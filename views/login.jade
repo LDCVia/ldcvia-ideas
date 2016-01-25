@@ -11,27 +11,14 @@ html(lang='en')
     link(rel='stylesheet', href='/bower_components/bootstrap/dist/css/bootstrap-theme.min.css')
     link(rel='stylesheet', href='/stylesheets/style.css')
   body
-    .navbar.navbar-inverse.navbar-fixed-top
-      .container
-        .navbar-header
-          button.navbar-toggle(type='button', data-toggle='collapse', data-target='.navbar-collapse')
-            span.icon-bar
-            span.icon-bar
-            span.icon-bar
-          a.navbar-brand(href='/') LDC Via Ideas
-        .collapse.navbar-collapse
-          ul.nav.navbar-nav
-            li
-              a(href='/') Home
-            li
-              a(href='/about') About
-            li
-              a(href='/contact') Contact
-          ul.nav.navbar-nav.navbar-right
-            li
-              a(href='/logout') Logout
     .container
-      block content
-
+      form.form-signin(role='form' action="/login" method="POST")
+        h2.form-signin-heading Please sign in
+        input.form-control(name='email', id='email', type='email', placeholder='Email address', required='', autofocus='')
+        input.form-control(name='password', id='password', type='password', placeholder='Password', required='')
+        if(error)
+          div.alert.alert-danger
+            | #{error}
+        button.btn.btn-lg.btn-primary.btn-block(type='submit') Sign in
     script(src="/bower_components/jquery/dist/jquery.min.js")
     script(src="/bower_components/bootstrap/dist/js/bootstrap.min.js")
