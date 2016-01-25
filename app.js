@@ -14,6 +14,8 @@ var app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
+console.log("API HOST = " + process.env.LDCVIA_IDEAS_APIHOST);
+
 // uncomment after placing your favicon in /public
 app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
@@ -22,6 +24,10 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser(process.env.LDCVIA_IDEAS_SECRET));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/bower_components', express.static(path.join(__dirname, '/bower_components')));
+
+app.locals._      = require('underscore');
+app.locals._.str  = require('underscore.string');
+app.locals.moment = require('moment');
 
 app.use('/', routes);
 app.use('/users', users);

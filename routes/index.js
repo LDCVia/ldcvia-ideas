@@ -5,7 +5,19 @@ var restler = require('restler');
 
 /* GET home page. */
 router.get('/', auth.requiresLogin,  function(req, res, next) {
-  res.render('index', { title: 'Express' });
+  try{
+    restler.get(
+      process.env.LDCVIA_IDEAS_APIHOST + "/collections/ldcvia-ideas/ideas",
+      {headers:
+        {'apikey': req.cookies.apikey}
+      }
+    )
+    .on('complete', function(data, response){
+      res.render('index', {"tab":"home", "ideas": data});
+    });
+  }catch(e){
+    res.render("login", {"error": e});
+  }
 });
 
 /* GET login page */
@@ -16,7 +28,7 @@ router.get('/login',  function(req, res, next) {
 router.post('/login', function(req, res, next){
   try{
     restler.postJson(
-      'https://eu.ldcvia.com/1.0/login',
+      process.env.LDCVIA_IDEAS_APIHOST + '/login',
       {'username': req.body.email, 'password': req.body.password}
     ).on('complete', function (data, response){
       if (data.apikey){
@@ -28,7 +40,6 @@ router.post('/login', function(req, res, next){
       };
     });
   }catch(e){
-    console.log(e);
     res.render("/login");
   }
 })

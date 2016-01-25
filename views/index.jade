@@ -1,5 +1,11 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title}
+  each idea in ideas.data
+    div.list-group
+      h4.list-group-item-heading= idea.title
+      div.row.list-group-item-text
+        div.col-md-8= idea.body
+        div.col-md-4
+          div= idea.createdby
+          div= moment(idea.datecreated).format('DD-MMM-YYYY HH:mm')
