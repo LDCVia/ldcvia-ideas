@@ -1,0 +1,24 @@
+{
+  "name": "ldcvia-ideas",
+  "description": "A simple idea management application using LDC Via as a back end",
+  "main": "app.js",
+  "authors": [
+    "Matt White <matt@ldcvia.com>"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/LonDC/ldcvia-ideas",
+  "moduleType": [],
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "~3.3.6",
+    "moment": "~2.11.1",
+    "jquery": "~2.2.0"
+  }
+}
