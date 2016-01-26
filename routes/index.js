@@ -29,7 +29,7 @@ router.get('/about', function(req, res, next) {
       }
     )
     .on('complete', function(data, response){
-      res.render('static', {"tab":"about", "page": data});
+      res.render('static', {"tab":"about", "email": req.cookies.email, "page": data});
     });
   }catch(e){
     res.render("login", {"error": e});
@@ -45,7 +45,7 @@ router.get('/contact', function(req, res, next) {
       }
     )
     .on('complete', function(data, response){
-      res.render('static', {"tab":"contact", "page": data});
+      res.render('static', {"tab":"contact", "email": req.cookies.email, "page": data});
     });
   }catch(e){
     res.render("login", {"error": e});
