@@ -1,24 +1,13 @@
-doctype html
-html(lang='en')
-  head
-    meta(charset='utf-8')
-    meta(name='viewport', content='width=device-width, initial-scale=1.0')
-    meta(name='description', content='')
-    meta(name='author', content='')
-    meta(name='copyright', content='Copyright (c) 2016 LDC Via')
-    title= title
-    link(rel='stylesheet', href='/bower_components/bootstrap/dist/css/bootstrap.min.css')
-    link(rel='stylesheet', href='/bower_components/bootstrap/dist/css/bootstrap-theme.min.css')
-    link(rel='stylesheet', href='/stylesheets/style.css')
-  body
-    .container
-      form.form-signin(role='form' action="/login" method="POST")
-        h2.form-signin-heading Please sign in
-        input.form-control(name='email', id='email', type='email', placeholder='Email address', required='', autofocus='')
-        input.form-control(name='password', id='password', type='password', placeholder='Password', required='')
-        if(error)
-          div.alert.alert-danger
-            | #{error}
-        button.btn.btn-lg.btn-primary.btn-block(type='submit') Sign in
-    script(src="/bower_components/jquery/dist/jquery.min.js")
-    script(src="/bower_components/bootstrap/dist/js/bootstrap.min.js")
+extends layout
+
+block content
+  form.form-signin(role='form' action="/login" method="POST")
+    h2.form-signin-heading Please sign in
+    input.form-control(name='email', id='email', type='email', placeholder='Email address', required='', autofocus='')
+    input.form-control(name='password', id='password', type='password', placeholder='Password', required='')
+    if(error)
+      div.alert.alert-danger
+        | #{error}
+    button.btn.btn-lg.btn-primary.btn-block(type='submit') Sign in
+    a.btn.btn-default.btn-block(href="https://eu.ldcvia.com/login/forgot") Forget your password?
+    a.btn.btn-default.btn-block(href="https://eu.ldcvia.com/register") Don't have an account? Register now
