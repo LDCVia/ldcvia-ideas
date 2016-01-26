@@ -13,12 +13,55 @@ router.get('/', auth.requiresLogin,  function(req, res, next) {
       }
     )
     .on('complete', function(data, response){
-      res.render('index', {"tab":"home", "email": req.cookies.email, "ideas": data});
+      res.render('index', {"tab":"home", "email": req.cookies.email, "ideas": data, "title": "LDC Via Ideas"});
     });
   }catch(e){
     res.render("login", {"error": e});
   }
 });
+
+router.get('/newidea', auth.requiresLogin, function(req, res, next){
+  res.render("idea-new", {"tab": "newidea", "email": req.cookies.email, "title": "New Idea | LDC Via Ideas"});
+})
+
+router.post('/newidea', auth.requiresLogin, function(req, res, next){
+  var data = {};
+  data.body = req.body.body;
+  data.title = req.body.title;
+  data.priority = req.body.priority;
+  data.status = req.body.status;
+  data.createdby = req.cookies.email;
+  data.datecreated = new Date();
+  data.__form = "ideas";
+  var unid = data.datecreated.getTime();
+  data.__unid = unid;
+  restler.putJson(
+    process.env.LDCVIA_IDEAS_APIHOST + "/document/ldcvia-ideas/ideas/" + unid,
+    data,
+    {headers:
+      {'apikey': req.cookies.apikey}
+    }
+  )
+  .on('complete', function(data, response){
+    res.redirect("/");
+  })
+})
+
+router.get('/idea/:unid', auth.requiresLogin, function(req, res, next){
+  try{
+    restler.get(
+      process.env.LDCVIA_IDEAS_APIHOST + "/document/ldcvia-ideas/ideas/" + req.params.unid,
+      {headers:
+        {'apikey': req.cookies.apikey}
+      }
+    )
+    .on('complete', function(data, response){
+      res.render('idea-read', {"tab":"idea", "email": req.cookies.email, "idea": data, "title": data.title + " | LDC Via Ideas"});
+    });
+  }catch(e){
+    res.render("login", {"error": e});
+  }
+})
 
 router.get('/about', function(req, res, next) {
   try{
@@ -29,7 +72,7 @@ router.get('/about', function(req, res, next) {
       }
     )
     .on('complete', function(data, response){
-      res.render('static', {"tab":"about", "email": req.cookies.email, "page": data});
+      res.render('static', {"tab":"about", "email": req.cookies.email, "page": data, "title": "About | LDC Via Ideas"});
     });
   }catch(e){
     res.render("login", {"error": e});
@@ -45,7 +88,7 @@ router.get('/contact', function(req, res, next) {
       }
     )
     .on('complete', function(data, response){
-      res.render('static', {"tab":"contact", "email": req.cookies.email, "page": data});
+      res.render('static', {"tab":"contact", "email": req.cookies.email, "page": data, "title": "Contact | LDC Via Ideas"});
     });
   }catch(e){
     res.render("login", {"error": e});
@@ -54,7 +97,7 @@ router.get('/contact', function(req, res, next) {
 
 /* GET login page */
 router.get('/login',  function(req, res, next) {
-  res.render('login', {"tab": "home"});
+  res.render('login', {"tab": "home", "title": "Login | LDC Via Ideas"});
 });
 
 router.post('/login', function(req, res, next){

@@ -1,11 +1,23 @@
 extends layout
 
 block content
-  each idea in ideas.data
-    div.list-group
-      h4.list-group-item-heading= idea.title
-      div.row.list-group-item-text
-        div.col-md-8= idea.body
-        div.col-md-4
-          div= idea.createdby
-          div= moment(idea.datecreated).format('DD-MMM-YYYY HH:mm')
+  div.list-group
+    each idea in ideas.data
+      div.list-group-item
+        div.row.idea-list-item
+          div.col-md-8
+            h4.list-group-item-heading= idea.title
+            div!= idea.body
+          div.col-md-4.idea-meta
+            div
+              p.small Status:
+              p= idea.status
+            div
+              p.small Priority:
+              p= idea.priority
+            div
+              p.small Created By:
+              p= idea.createdby
+            div
+              p.small Created:
+              p= moment(idea.datecreated).format('DD-MMM-YYYY HH:mm')

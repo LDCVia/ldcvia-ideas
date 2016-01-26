@@ -42,3 +42,14 @@
   border-top-left-radius: 0;
   border-top-right-radius: 0;
 }
+
+.idea-meta {
+  color: #cccccc;
+}
+.idea-meta p {
+  display: inline;
+  padding: 3px;
+}
+.idea-list-item {
+  cursor: pointer;
+}

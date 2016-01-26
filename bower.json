@@ -19,6 +19,7 @@
   "dependencies": {
     "bootstrap": "~3.3.6",
     "moment": "~2.11.1",
-    "jquery": "~2.2.0"
+    "jquery": "~2.2.0",
+    "ckeditor": "~4.5.6"
   }
 }
