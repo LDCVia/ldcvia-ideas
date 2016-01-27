@@ -63,6 +63,58 @@ router.get('/idea/:unid', auth.requiresLogin, function(req, res, next){
   }
 })
 
+router.get('/editidea/:unid', auth.requiresLogin, function(req, res, next){
+  try{
+    restler.get(
+      process.env.LDCVIA_IDEAS_APIHOST + "/document/ldcvia-ideas/ideas/" + req.params.unid,
+      {headers:
+        {'apikey': req.cookies.apikey}
+      }
+    )
+    .on('complete', function(data, response){
+      data.priorities = ["High", "Medium", "Low"];
+      data.statuses = ["New","In Progress","Rejected","Complete"];
+      res.render('idea-edit', {"tab":"idea", "email": req.cookies.email, "idea": data, "title": data.title + " | LDC Via Ideas"});
+    });
+  }catch(e){
+    res.render("login", {"error": e});
+  }
+})
+
+router.post('/editidea/:unid', auth.requiresLogin, function(req, res, next){
+  var data = {};
+  data.body = req.body.body;
+  data.title = req.body.title;
+  data.priority = req.body.priority;
+  data.status = req.body.status;
+  restler.postJson(
+    process.env.LDCVIA_IDEAS_APIHOST + "/document/ldcvia-ideas/ideas/" + req.params.unid,
+    data,
+    {headers:
+      {'apikey': req.cookies.apikey}
+    }
+  )
+  .on('complete', function(data, response){
+    res.redirect("/idea/" + req.params.unid);
+  })
+})
+
+router.get("/deleteidea/:unid", auth.requiresLogin, function(req, res, next){
+  try{
+    restler.del(
+      process.env.LDCVIA_IDEAS_APIHOST + "/document/ldcvia-ideas/ideas/" + req.params.unid,
+      {headers:
+        {'apikey': req.cookies.apikey}
+      }
+    )
+    .on('complete', function(data, response){
+      res.redirect("/");
+    });
+  }catch(e){
+    res.render("login", {"error": e});
+  }
+})
+
 router.get('/about', function(req, res, next) {
   try{
     restler.get(

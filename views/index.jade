@@ -4,10 +4,10 @@ block content
   div.list-group
     each idea in ideas.data
       div.list-group-item
-        div.row.idea-list-item
+        div.row.idea-list-item(onclick="openIdea('#{idea.__unid}')")
           div.col-md-8
             h4.list-group-item-heading= idea.title
-            div!= idea.body
+            div.fade-body!= idea.body
           div.col-md-4.idea-meta
             div
               p.small Status:

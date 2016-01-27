@@ -1,0 +1,30 @@
+extends layout
+block content
+  script(src="/bower_components/ckeditor/ckeditor.js")
+  form(role='form' action="/editidea/#{idea.__unid}" method="POST")
+    h2 New Idea
+    div.form-group
+      label(for="title") Title
+      input.form-control(id="title" name="title" placeholder="Title" value="#{idea.title}")
+    div.form-group
+      label(for="priority") Priority
+      select.form-control(id="priority" name="priority")
+        for priority in idea.priorities
+          option(selected=idea.priority==priority) #{priority}
+    div.form-group
+      label(for="status") Priority
+      select.form-control(id="status" name="status")
+        for status in idea.statuses
+          option(selected=idea.status==status) #{status}
+    div.form-group
+      label(for="body") Description
+      textarea(name="body" id="body" rows="10" cols="80")
+        | #{idea.body}
+      script(type="text/javascript").
+        CKEDITOR.replace("body");
+    if(error)
+      div.alert.alert-danger
+        | #{error}
+    div.btn-group.pull-right
+      button.btn.btn-lg.btn-primary(type='submit') Submit
+      a.btn.btn-default.btn-lg(href="/") Cancel

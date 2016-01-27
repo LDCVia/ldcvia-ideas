@@ -1,34 +1,30 @@
 extends layout
 block content
-  script(src="/bower_components/ckeditor/ckeditor.js")
-  form(role='form' action="/newidea" method="POST")
-    h2 New Idea
-    div.form-group
-      label(for="title") Title
-      input.form-control(id="title" name="title" placeholder="Title")
-    div.form-group
-      label(for="priority") Priority
-      select.form-control(id="priority" name="priority")
-        option(value="") Please select a priority
-        option(value="High") High
-        option(value="Medium") Medium
-        option(value="Low") Low
-    div.form-group
-      label(for="status") Priority
-      select.form-control(id="status" name="status")
-        option(value="") Please select a status
-        option(value="New") New
-        option(value="In Progress") In Progress
-        option(value="Rejected") Rejected
-        option(value="Complete") Complete
-    div.form-group
-      label(for="body") Description
-      textarea(name="body" id="body" rows="10" cols="80")
-      script(type="text/javascript").
-        CKEDITOR.replace("body");
-    if(error)
-      div.alert.alert-danger
-        | #{error}
-    div.btn-group.pull-right
-      button.btn.btn-lg.btn-primary(type='submit') Submit
-      a.btn.btn-default.btn-lg(href="/") Cancel
+  h2 New Idea
+  div.form-group
+    label(for="title") Title
+    h4= idea.title
+  div.form-group
+    label(for="priority") Priority
+    h4= idea.priority
+  div.form-group
+    label(for="status") Status
+    h4= idea.status
+  div.form-group
+    label(for="body") Description
+    h4!= idea.body
+  div.btn-group.pull-right
+    a.btn.btn-default.btn-lg(href="/editidea/#{idea.__unid}") Edit
+    button.btn.btn-danger.btn-lg(data-toggle="modal" data-target="#deletemodal") Delete
+  div.modal.fade#deletemodal(tabindex="-1" role="dialog")
+    div.modal-dialog
+      div.modal-content
+        div.modal-header
+          button(type="button" class="close" data-dismiss="modal" aria-label="Close")
+            span(aria-hidden="true") &times;
+          h4.modal-title Delete Idea
+        div.modal-body
+          p Are you sure you want to delete this idea?
+        div.modal-footer
+          button.btn.btn-default(type="button" data-dismiss="modal") Cancel
+          a.btn.btn-danger(href="/deleteidea/#{idea.__unid}") Confirm

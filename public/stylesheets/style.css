@@ -53,3 +53,14 @@
 .idea-list-item {
   cursor: pointer;
 }
+.idea-list-item img {
+  max-width: 100%;
+}
+.idea-list-item:hover {
+  background-color: inherit;
+}
+.fade-body {
+  max-height: 250px;
+  position: relative;
+  overflow: hidden;
+}
