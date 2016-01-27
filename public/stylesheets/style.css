@@ -1,11 +1,12 @@
-@media (min-width: 979px) {
-    body {
-        padding-top: 120px;
-    }
+body {
+  padding-top: 60px;
 }
 
-.navbar {
-  height: 90px;
+.navbar-brand {
+  padding: 0px;
+}
+.navbar-brand img{
+  max-height: 50px;
 }
 
 .form-signin {
