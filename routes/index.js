@@ -50,7 +50,7 @@ router.post('/newidea', auth.requiresLogin, function(req, res, next){
 router.get('/idea/:unid', auth.requiresLogin, function(req, res, next){
   try{
     restler.get(
-      process.env.LDCVIA_IDEAS_APIHOST + "/document/ldcvia-ideas/ideas/" + req.params.unid,
+      process.env.LDCVIA_IDEAS_APIHOST + "/document/ldcvia-ideas/ideas/" + req.params.unid + "?all",
       {headers:
         {'apikey': req.cookies.apikey}
       }
@@ -66,7 +66,7 @@ router.get('/idea/:unid', auth.requiresLogin, function(req, res, next){
 router.get('/editidea/:unid', auth.requiresLogin, function(req, res, next){
   try{
     restler.get(
-      process.env.LDCVIA_IDEAS_APIHOST + "/document/ldcvia-ideas/ideas/" + req.params.unid,
+      process.env.LDCVIA_IDEAS_APIHOST + "/document/ldcvia-ideas/ideas/" + req.params.unid + "?all",
       {headers:
         {'apikey': req.cookies.apikey}
       }
@@ -74,7 +74,11 @@ router.get('/editidea/:unid', auth.requiresLogin, function(req, res, next){
     .on('complete', function(data, response){
       data.priorities = ["High", "Medium", "Low"];
       data.statuses = ["New","In Progress","Rejected","Complete"];
-      res.render('idea-edit', {"tab":"idea", "email": req.cookies.email, "idea": data, "title": data.title + " | LDC Via Ideas"});
+      if (data.__iseditable){
+        res.render('idea-edit', {"tab":"idea", "email": req.cookies.email, "idea": data, "title": data.title + " | LDC Via Ideas"});
+      }else{
+        res.render('idea-read', {"tab":"idea", "email": req.cookies.email, "idea": data, "title": data.title + " | LDC Via Ideas"});
+      }
     });
   }catch(e){
     res.render("login", {"error": e});
