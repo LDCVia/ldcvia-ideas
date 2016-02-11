@@ -2,6 +2,17 @@ var express = require('express');
 var router = express.Router();
 var auth = require('../controllers/authorization');
 var restler = require('restler');
+var cookie = require('cookie');
+var _ = require("underscore");
+
+function getCookies(req){
+  var cookies = _.map(req.cookies, function(val, key) {
+    if(key == "connect.sid"){
+      return key + "=" + val['connect.sid'];
+    }
+  }).join("; ");
+  return cookies;
+}
 
 /* GET home page. */
 router.get('/', auth.requiresLogin,  function(req, res, next) {
@@ -9,11 +20,15 @@ router.get('/', auth.requiresLogin,  function(req, res, next) {
     restler.get(
       process.env.LDCVIA_IDEAS_APIHOST + "/collections/ldcvia-ideas/ideas",
       {headers:
-        {'apikey': req.cookies.apikey}
+        {'cookie': getCookies(req)}
       }
     )
     .on('complete', function(data, response){
-      res.render('index', {"tab":"home", "email": req.cookies.email, "ideas": data, "title": "LDC Via Ideas"});
+      if(response.statusCode == 200){
+        res.render('index', {"tab":"home", "email": req.cookies.email, "ideas": data, "title": "LDC Via Ideas"});
+      }else{
+        res.render("login", {"error": data});
+      }
     });
   }catch(e){
     res.render("login", {"error": e});
@@ -33,13 +48,14 @@ router.post('/newidea', auth.requiresLogin, function(req, res, next){
   data.createdby = req.cookies.email;
   data.datecreated = new Date();
   data.__form = "ideas";
+  data.votes = 0;
   var unid = data.datecreated.getTime();
   data.__unid = unid;
   restler.putJson(
     process.env.LDCVIA_IDEAS_APIHOST + "/document/ldcvia-ideas/ideas/" + unid,
     data,
     {headers:
-      {'apikey': req.cookies.apikey}
+      {'cookie': getCookies(req)}
     }
   )
   .on('complete', function(data, response){
@@ -52,7 +68,7 @@ router.get('/idea/:unid', auth.requiresLogin, function(req, res, next){
     restler.get(
       process.env.LDCVIA_IDEAS_APIHOST + "/document/ldcvia-ideas/ideas/" + req.params.unid + "?all",
       {headers:
-        {'apikey': req.cookies.apikey}
+        {'cookie': getCookies(req)}
       }
     )
     .on('complete', function(data, response){
@@ -68,7 +84,7 @@ router.get('/editidea/:unid', auth.requiresLogin, function(req, res, next){
     restler.get(
       process.env.LDCVIA_IDEAS_APIHOST + "/document/ldcvia-ideas/ideas/" + req.params.unid + "?all",
       {headers:
-        {'apikey': req.cookies.apikey}
+        {'cookie': getCookies(req)}
       }
     )
     .on('complete', function(data, response){
@@ -95,7 +111,7 @@ router.post('/editidea/:unid', auth.requiresLogin, function(req, res, next){
     process.env.LDCVIA_IDEAS_APIHOST + "/document/ldcvia-ideas/ideas/" + req.params.unid,
     data,
     {headers:
-      {'apikey': req.cookies.apikey}
+      {'cookie': getCookies(req)}
     }
   )
   .on('complete', function(data, response){
@@ -103,12 +119,112 @@ router.post('/editidea/:unid', auth.requiresLogin, function(req, res, next){
   })
 })
 
+router.get('/upvote/:unid', auth.requiresLogin, function(req, res, next){
+  castVote(req, res, 1, function(votes, votecast, err){
+    if (err){
+      res.status(200).send({"votes": votes, "votecast": votecast, "error": err});
+    }else{
+      res.status(200).send({"votes": votes, "votecast": votecast});
+    }
+  })
+})
+
+router.get('/downvote/:unid', auth.requiresLogin, function(req, res, next){
+  castVote(req, res, -1, function(votes, votecast, err){
+    if (err){
+      res.status(200).send({"votes": votes, "votecast": votecast, "error": err});
+    }else{
+      res.status(200).send({"votes": votes, "votecast": votecast});
+    }
+  })
+})
+
+function castVote(req, res, score, callback){
+  var email = req.cookies.email;
+  var data = {"filters": [
+    {
+      "operator": "equals",
+      "field": "__parentid",
+      "value": req.params.unid
+    },
+    {
+      "operator": "equals",
+      "field": "createdby",
+      "value": email
+    }
+  ]};
+  restler.postJson(
+    process.env.LDCVIA_IDEAS_APIHOST + "/search/ldcvia-ideas/votes?join=and",
+    data,
+    {headers:
+      {'cookie': getCookies(req)}
+    }
+  ).on('complete', function(data, response){
+    console.log("Got " + data.count + " votes");
+    if (data.count == 0){
+      //Insert a new vote
+      var vote = {};
+      var date = new Date();
+      var unid = date.getTime();
+      vote.__unid = unid;
+      vote.createdby = email;
+      vote.vote = score;
+      vote.__parentid = req.params.unid;
+      vote.__form = "vote";
+
+      restler.putJson(
+        process.env.LDCVIA_IDEAS_APIHOST + "/document/ldcvia-ideas/votes/" + unid,
+        vote,
+        {headers:
+          {'cookie': getCookies(req)}
+        }
+      ).on('complete', function(data, response){
+        //Update the idea with the score
+        restler.get(
+          process.env.LDCVIA_IDEAS_APIHOST + "/document/ldcvia-ideas/ideas/" + req.params.unid,
+          {headers:
+            {'cookie': getCookies(req)}
+          }
+        ).on('complete', function(data, response){
+          if (!data.votes){
+            data.votes = 0;
+          }
+          var newscore = data.votes + score;
+          restler.postJson(
+            process.env.LDCVIA_IDEAS_APIHOST + "/document/ldcvia-ideas/ideas/" + req.params.unid,
+            {"votes": newscore},
+            {headers:
+              {'cookie': getCookies(req)}
+            }
+          ).on('complete', function(data, response){
+            callback(newscore, true);
+          })
+        })
+      })
+    }else{
+      //The user has already cast a vote so return current score
+      restler.get(
+        process.env.LDCVIA_IDEAS_APIHOST + "/document/ldcvia-ideas/ideas/" + req.params.unid,
+        {headers:
+          {'cookie': getCookies(req)}
+        }
+      ).on('complete', function(data, response){
+        if(data.votes){
+          callback(data.votes, false, "Vote already cast");
+        }else{
+          callback(0, false, "Vote already cast");
+        }
+      })
+    }
+  })
+}
+
 router.get("/deleteidea/:unid", auth.requiresLogin, function(req, res, next){
   try{
     restler.del(
       process.env.LDCVIA_IDEAS_APIHOST + "/document/ldcvia-ideas/ideas/" + req.params.unid,
       {headers:
-        {'apikey': req.cookies.apikey}
+        {'cookie': getCookies(req)}
       }
     )
     .on('complete', function(data, response){
@@ -159,15 +275,23 @@ router.get('/login',  function(req, res, next) {
 router.post('/login', function(req, res, next){
   try{
     restler.postJson(
-      process.env.LDCVIA_IDEAS_APIHOST + '/login',
-      {'username': req.body.email, 'password': req.body.password}
+      "https://eu.ldcvia.com/login",
+      {'username': req.body.email, 'email': req.body.email, 'password': req.body.password}
     ).on('complete', function (data, response){
-      if (data.apikey){
-        res.cookie('apikey', data.apikey);
-        res.cookie('email', data.email);
+      // display returned cookies in header
+      var setcookie = response.headers["set-cookie"];
+      var cookieobj = {};
+      for (var i=0; i<setcookie.length; i++){
+        if (setcookie[i].indexOf("connect.sid=") > -1){
+          cookieobj = cookie.parse(setcookie[i]);
+        }
+      }
+      if (cookieobj['connect.sid'] && data.success){
+        res.cookie('connect.sid', cookieobj);
+        res.cookie('email', req.body.email);
         res.redirect("/");
       }else{
-        res.render("login", {"error": data.error});
+        res.render("login", {"error": data.errors[0]});
       };
     });
   }catch(e){
@@ -176,7 +300,7 @@ router.post('/login', function(req, res, next){
 })
 
 router.get('/logout', auth.requiresLogin, function(req, res, next){
-  res.clearCookie('apikey');
+  res.clearCookie('connect.sid');
   res.clearCookie('email');
   res.redirect('/');
 })

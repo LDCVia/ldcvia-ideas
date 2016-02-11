@@ -5,7 +5,16 @@ block content
     each idea in ideas.data
       div.list-group-item
         div.row.idea-list-item(onclick="openIdea('#{idea.__unid}')")
-          div.col-md-8
+          div.col-md-1
+            div
+              button.btn.btn-default.btn-xs.btn-success.btn-block.btn-vote-up(unid="#{idea.__unid}")
+                i.glyphicon.glyphicon-thumbs-up
+            div.center-block
+              button.btn-btn-default.btn-block.btn-votes(id="votes-#{idea.__unid}" disabled=true) #{idea.votes}
+            div
+              button.btn.btn-default.btn-xs.btn-danger.btn-block.btn-vote-down(unid="#{idea.__unid}")
+                i.glyphicon.glyphicon-thumbs-down
+          div.col-md-7
             h4.list-group-item-heading= idea.title
             div.fade-body!= idea.body
           div.col-md-4.idea-meta

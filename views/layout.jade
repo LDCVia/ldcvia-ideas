@@ -48,8 +48,11 @@ html(lang='en')
               li
                 a(href='/logout') Logout
     .container
+      div.alert.alert-danger.fade#general-alert
+        button.close(type="button" data-dismiss="alert") x
+        p#general-alert-message
       block content
-
     script(src="/bower_components/jquery/dist/jquery.min.js")
     script(src="/bower_components/bootstrap/dist/js/bootstrap.min.js")
+    script(src="/bower_components/remarkable-bootstrap-notify/dist/bootstrap-notify.min.js")
     script(src="/javascripts/site.js")

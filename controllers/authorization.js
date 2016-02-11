@@ -3,6 +3,6 @@
  */
 
 exports.requiresLogin = function (req, res, next) {
-  if (req.cookies.apikey != null && req.cookies.apikey != '') return next()
+  if (req.cookies['connect.sid'] != null) return next()
   res.redirect('/login')
 }
